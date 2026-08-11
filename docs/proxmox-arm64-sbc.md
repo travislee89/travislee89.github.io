@@ -4,7 +4,7 @@ Proxmox VE 官方已经提供 ARM64 支持，但官方的安装流程是基于 U
 
 问题是，绝大多数 ARM64 SBC（比如各类 Rockchip、Allwinner 方案的板子）既不支持 UEFI，也不支持 ACPI，只能用厂商定制的内核（比如基于 Armbian 的内核）通过 u-boot 之类的方式启动。如果照官方流程装 `proxmox-kernel`，SBC 大概率直接起不来。
 
-解决思路是：**保留 SBC 厂商自带的内核，用 `equivs` 做两个空的"占位包"去满足 `pve-manager` 对 `proxmox-default-kernel` 和 `pve-firmware` 的依赖，然后把这两个真实包锁定为禁止安装**，这样既能装上完整的 Proxmox VE 管理套件，又不会覆盖掉 SBC 能正常启动所依赖的内核。
+解决思路是：**保留 SBC 厂商自带的内核，用 `equivs` 做两个空的“占位包”去满足 `pve-manager` 对 `proxmox-default-kernel` 和 `pve-firmware` 的依赖，然后把这两个真实包锁定为禁止安装**，这样既能装上完整的 Proxmox VE 管理套件，又不会覆盖掉 SBC 能正常启动所依赖的内核。
 
 下面是完整流程。
 
@@ -29,7 +29,8 @@ echo "${ip} ${hostname}.local ${hostname}" | sudo tee -a /etc/hosts
 官方仓库本身就带 arm64 架构的包，只需要在源里显式声明 `Architectures: arm64`：
 
 ```bash
-sudo wget https://enterprise.proxmox.com/debian/proxmox-release-trixie.gpg -O /etc/apt/trusted.gpg.d/proxmox-release-trixie.gpg
+sudo wget https://enterprise.proxmox.com/debian/proxmox-release-trixie.gpg \
+     -O /etc/apt/trusted.gpg.d/proxmox-release-trixie.gpg
 
 echo "Types: deb
 URIs: http://download.proxmox.com/debian/pve
@@ -98,7 +99,7 @@ sudo apt install equivs -y
 
 ### 5.1 伪造 `proxmox-default-kernel`
 
-官方 `pve-manager` 强制依赖 `proxmox-default-kernel`，这个包会拉入真正的 Proxmox 内核，并假设走 UEFI 启动。SBC 不需要也用不了这个内核，所以要做一个空包去"顶替"这个依赖：
+官方 `pve-manager` 强制依赖 `proxmox-default-kernel`，这个包会拉入真正的 Proxmox 内核，并假设走 UEFI 启动。SBC 不需要也用不了这个内核，所以要做一个空包去“顶替”这个依赖：
 
 ```bash
 mk_pve_kernel_dummy() {
@@ -166,8 +167,8 @@ EOF
 这个函数做了四件事：
 
 1. 确认 `equivs` 已安装；
-2. 从当前 APT 仓库里查出所有实际存在的 `proxmox-kernel-*` 包名，作为 `Provides` 字段填进 dummy 包，这样任何声明依赖具体某个 `proxmox-kernel-x.y` 版本的包也会被这个空包"满足"；
-3. 用 `equivs-build` 打出一个版本号为 `99.0.0` 的假 `proxmox-default-kernel` 包并安装——版本号故意给得很大，让 APT 永远认为它是"最新版"，不会被真正的内核包替换掉；
+2. 从当前 APT 仓库里查出所有实际存在的 `proxmox-kernel-*` 包名，作为 `Provides` 字段填进 dummy 包，这样任何声明依赖具体某个 `proxmox-kernel-x.y` 版本的包也会被这个空包“满足”；
+3. 用 `equivs-build` 打出一个版本号为 `99.0.0` 的假 `proxmox-default-kernel` 包并安装——版本号故意给得很大，让 APT 永远认为它是“最新版”，不会被真正的内核包替换掉；
 4. 写入 APT pin 规则，把所有 `proxmox-kernel-*` 和 `proxmox-headers-*` 的 `Pin-Priority` 设为 `-1`（禁止安装），并对 `proxmox-default-kernel` 执行 `apt-mark hold`，防止后续 `apt upgrade` 时把 SBC 自身能用的内核换掉。
 
 ### 5.2 伪造 `pve-firmware`
@@ -214,12 +215,40 @@ EOF
 
 逻辑和内核包一样：打一个版本号 `99.0.0` 的空包声明 `Provides: pve-firmware`，装上后 `apt-mark hold`，锁死版本,不让真正的 `pve-firmware` 覆盖进来。
 
-### 5.3 执行伪造并安装 Proxmox VE
+### 5.3 静默安装postfix
+
+```bash
+setup_postfix_local() {
+    echo "==> Setting up Postfix automatically as 'Local only'..."
+
+    # Install debconf-utils if debconf-set-selections is missing
+    if ! command -v debconf-set-selections &>/dev/null; then
+        sudo apt install -y -qq debconf-utils
+    fi
+
+    local mail_domain
+    mail_domain=$(hostname -f 2>/dev/null || hostname)
+
+    # Inject debconf values for unattended installation
+    sudo debconf-set-selections <<EOF
+postfix postfix/main_mailer_type select Local only
+postfix postfix/mailname string ${mail_domain}
+EOF
+
+    # Run installation non-interactively
+    DEBIAN_FRONTEND=noninteractive sudo apt-get install -y postfix
+
+    echo "Postfix successfully installed as Local only!"
+}
+```
+
+### 5.4 执行伪造并安装 Proxmox VE
 
 ```bash
 mk_pve_firmware_dummy
 mk_pve_kernel_dummy
-sudo apt install proxmox-ve pve-manager
+setup_postfix_local
+sudo apt install -y proxmox-ve pve-manager
 ```
 
 两个空包装好、依赖满足之后，`apt install proxmox-ve pve-manager` 就能顺利跑完，不会再去拉取那些依赖 UEFI 启动的真实内核和固件包。

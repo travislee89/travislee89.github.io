@@ -1,0 +1,4 @@
+source "https://rubygems.org"
+
+# 与 GitHub Pages 使用完全一致的依赖版本，用于本地构建验证
+gem "github-pages", group: :jekyll_plugins

@@ -1,3 +1,13 @@
+---
+layout: post
+title: Installing Proxmox VE on ARM64 SBCs Without UEFI Support
+date: 2026-08-12
+lang: en
+translation: /proxmox/2026/08/12/proxmox-arm64-sbc/
+categories: proxmox
+tags: [proxmox, arm64, sbc, linux]
+---
+
 # Installing Proxmox VE on ARM64 SBCs Without UEFI Support
 
 Proxmox VE now officially provides ARM64 support, but the official installation process is designed around UEFI + ACPI. It installs `proxmox-kernel` (the kernel built by Proxmox) and `pve-firmware`, and assumes that the hardware follows a standard UEFI boot process.

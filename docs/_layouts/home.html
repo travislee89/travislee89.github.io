@@ -1,0 +1,18 @@
+---
+layout: default
+---
+<div class="home">
+  <h1 class="page-heading">
+    {% if page.lang == 'en' %}Latest Posts{% else %}最新文章{% endif %}
+  </h1>
+
+  <ul class="post-list">
+    {% for post in site.posts %}
+      <li>
+        <span class="post-meta">{{ post.date | date: "%Y-%m-%d" }}</span>
+        <span class="post-lang">[{{ post.lang | upcase }}]</span>
+        <a class="post-link" href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>

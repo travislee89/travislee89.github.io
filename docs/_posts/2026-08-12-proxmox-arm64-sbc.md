@@ -1,3 +1,13 @@
+---
+layout: post
+title: 在不支持 UEFI 的 ARM64 SBC 上安装 Proxmox VE
+date: 2026-08-12
+lang: zh
+translation: /proxmox/2026/08/12/proxmox-arm64-sbc-en/
+categories: proxmox
+tags: [proxmox, arm64, sbc, linux]
+---
+
 # 在不支持 UEFI 的 ARM64 SBC 上安装 Proxmox VE
 
 Proxmox VE 官方已经提供 ARM64 支持，但官方的安装流程是基于 UEFI + ACPI 设计的：它会安装 `proxmox-kernel`（Proxmox 自己编译的内核）和 `pve-firmware`，并假定硬件走标准的 UEFI 启动流程。

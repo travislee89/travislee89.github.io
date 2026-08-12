@@ -1,0 +1,24 @@
+# 站点配置
+title: Travis 的博客
+description: >-
+  记录 Proxmox、Linux、ARM64 自建服务器等动手笔记。
+baseurl: ""            # 用户站点 (username.github.io) 留空
+url: "https://travislee89.github.io"
+permalink: pretty      # /proxmox/2026/08/12/proxmox-arm64-sbc/
+
+author: travislee89
+lang: zh
+
+# 构建 / 主题
+theme: minima
+plugins:
+  - jekyll-feed
+
+# 以下与 GitHub Pages 原生构建一致（显式声明，便于本地复现）
+lsi: false
+safe: true
+incremental: false
+highlighter: rouge
+kramdown:
+  math_engine: mathjax
+  syntax_highlighter: rouge

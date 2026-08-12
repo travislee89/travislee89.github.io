@@ -29,7 +29,7 @@ gateway=192.168.1.1
 interface=eth0
 
 echo "${hostname}" | sudo tee /etc/hostname
-echo "${ip} ${hostname}.local ${hostname}" | sudo tee -a /etc/hosts
+echo "${ip%/*} ${hostname}.local ${hostname}" | sudo tee -a /etc/hosts
 ```
 
 Change `hostname`, `ip`, `gateway`, and `interface` (the network interface name) according to your own network setup.

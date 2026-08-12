@@ -1,9 +1,63 @@
+/* ---- 主题变量：浅色（默认） ---- */
 :root {
+  color-scheme: light;
   --accent: #1756a9;
   --text: #222;
   --muted: #777;
   --bg: #fff;
   --border: #eee;
+
+  --code-bg: #f6f8fa;
+  --inline-code-bg: #f0f0f0;
+  --translation-bg: #fafafa;
+  --tag-bg: #eef2f7;
+
+  /* 语法高亮（GitHub 浅色配色） */
+  --hl-comment: #6a737d;
+  --hl-keyword: #cf222e;
+  --hl-string: #0a3069;
+  --hl-number: #0550ae;
+  --hl-name-attr: #116329;
+  --hl-name-builtin: #953800;
+  --hl-name-class: #953800;
+  --hl-name-macro: #8250df;
+  --hl-name-func: #8250df;
+  --hl-name-namespace: #953800;
+  --hl-var: #0a3069;
+  --hl-const: #953800;
+  --hl-err: #b60205;
+}
+
+/* ---- 深色主题：跟随系统设置自动切换 ---- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --accent: #6cb2ff;
+    --text: #e6edf3;
+    --muted: #9da7b3;
+    --bg: #0d1117;
+    --border: #30363d;
+
+    --code-bg: #161b22;
+    --inline-code-bg: #21262d;
+    --translation-bg: #161b22;
+    --tag-bg: #21262d;
+
+    /* 语法高亮（GitHub 深色配色） */
+    --hl-comment: #8b949e;
+    --hl-keyword: #ff7b72;
+    --hl-string: #a5d6ff;
+    --hl-number: #79c0ff;
+    --hl-name-attr: #7ee787;
+    --hl-name-builtin: #ffa657;
+    --hl-name-class: #ffa657;
+    --hl-name-macro: #d2a8ff;
+    --hl-name-func: #d2a8ff;
+    --hl-name-namespace: #ffa657;
+    --hl-var: #ffa657;
+    --hl-const: #ffa657;
+    --hl-err: #f85149;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -36,7 +90,8 @@ body {
 .site-nav a { margin-left: 1rem; color: var(--accent); text-decoration: none; }
 
 .site-main {
-  max-width: 720px;
+  /* 主流屏幕宽度：随视口缩放，最大约 1152px，避免只占中间一小段 */
+  width: min(100% - 2.5rem, 72rem);
   margin: 0 auto;
   padding: 1.5rem 1.5rem 3rem;
 }
@@ -56,30 +111,99 @@ a { color: var(--accent); }
 
 .post-translation {
   border: 1px dashed var(--border);
-  background: #fafafa;
+  background: var(--translation-bg);
   padding: .5rem .75rem;
   font-size: .95rem;
 }
 
 .post-content pre {
-  background: #f6f8fa;
+  background: var(--code-bg);
   padding: 1rem;
   overflow-x: auto;
   border-radius: 4px;
 }
 
 .post-content code {
-  background: #f0f0f0;
+  background: var(--inline-code-bg);
   padding: .15em .35em;
   border-radius: 3px;
   font-size: .9em;
 }
 
+.post-content pre,
+.post-content code {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
 .post-content pre code { background: none; padding: 0; }
+
+/* ------------------------------------------------------------------
+   代码语法高亮 —— 对应 Jekyll(Rouge) 输出的 token class
+   Rouge 会把代码块输出为：
+   <div class="highlight"><pre class="highlight"><code>…<span class="k">…</span>…</code></pre></div>
+   ------------------------------------------------------------------ */
+.post-content .highlight { background: var(--code-bg); }
+
+/* 注释 */
+.post-content .highlight .c,
+.post-content .highlight .c1,
+.post-content .highlight .cm { color: var(--hl-comment); font-style: italic; }
+.post-content .highlight .cp,
+.post-content .highlight .cs { color: var(--hl-comment); font-weight: 600; }
+
+/* 关键字 */
+.post-content .highlight .k,
+.post-content .highlight .kc,
+.post-content .highlight .kd,
+.post-content .highlight .kn,
+.post-content .highlight .kp,
+.post-content .highlight .kr,
+.post-content .highlight .kt { color: var(--hl-keyword); font-weight: 600; }
+
+/* 操作符 */
+.post-content .highlight .o { color: var(--hl-keyword); }
+.post-content .highlight .ow { color: var(--hl-keyword); font-weight: 600; }
+
+/* 字符串 */
+.post-content .highlight .s,
+.post-content .highlight .s1,
+.post-content .highlight .s2,
+.post-content .highlight .sb,
+.post-content .highlight .sc,
+.post-content .highlight .sd,
+.post-content .highlight .se,
+.post-content .highlight .sh,
+.post-content .highlight .si,
+.post-content .highlight .sx,
+.post-content .highlight .sr,
+.post-content .highlight .ss { color: var(--hl-string); }
+
+/* 数字 */
+.post-content .highlight .m,
+.post-content .highlight .mf,
+.post-content .highlight .mh,
+.post-content .highlight .mi,
+.post-content .highlight .mo,
+.post-content .highlight .il { color: var(--hl-number); }
+
+/* 名称 / 标识符 */
+.post-content .highlight .na { color: var(--hl-name-attr); }                  /* 属性名 */
+.post-content .highlight .nb { color: var(--hl-name-builtin); }               /* 内建名 */
+.post-content .highlight .nc { color: var(--hl-name-class); font-weight: 600; }   /* 类名 */
+.post-content .highlight .nd { color: var(--hl-name-macro); }                 /* 宏 / 装饰器名 */
+.post-content .highlight .nf { color: var(--hl-name-func); }                  /* 函数 / 方法名 */
+.post-content .highlight .nn { color: var(--hl-name-namespace); font-weight: 600; } /* 命名空间 */
+.post-content .highlight .nv { color: var(--hl-var); }                        /* 变量名 */
+.post-content .highlight .no { color: var(--hl-const); }                      /* 常量名 */
+
+/* 错误 / 增删高亮 */
+.post-content .highlight .err { color: var(--hl-err); font-weight: 600; }
+.post-content .highlight .gd { color: var(--hl-err); }
+.post-content .highlight .gi { color: var(--hl-name-attr); }
 
 .post-tags .tag {
   display: inline-block;
-  background: #eef2f7;
+  background: var(--tag-bg);
   color: var(--accent);
   font-size: .8rem;
   border-radius: 3px;

@@ -26,13 +26,13 @@ Adjust these values to match your environment:
 hostname=pve
 ip=192.168.1.64/24
 gateway=192.168.1.1
-interfance=eth0
+interface=eth0
 
 echo "${hostname}" | sudo tee /etc/hostname
 echo "${ip} ${hostname}.local ${hostname}" | sudo tee -a /etc/hosts
 ```
 
-Change `hostname`, `ip`, `gateway`, and `interfance` (the network interface name) according to your own network setup.
+Change `hostname`, `ip`, `gateway`, and `interface` (the network interface name) according to your own network setup.
 
 ## 2. Add the Proxmox APT repository
 
@@ -78,7 +78,7 @@ echo "
 auto lo
 iface lo inet loopback
 
-iface ${interfance} inet manual
+iface ${interface} inet manual
 
 auto vmbr0
 iface vmbr0 inet static
@@ -86,7 +86,7 @@ iface vmbr0 inet static
     gateway ${gateway}
     dns-nameservers ${gateway}
     dns-search local
-    bridge-ports ${interfance}
+    bridge-ports ${interface}
     bridge-stp off
     bridge-fd 0
     bridge-vlan-aware yes

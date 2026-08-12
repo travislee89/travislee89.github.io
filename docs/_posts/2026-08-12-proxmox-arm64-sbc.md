@@ -26,13 +26,13 @@ Proxmox VE 官方已经提供 ARM64 支持，但官方的安装流程是基于 U
 hostname=pve
 ip=192.168.1.64/24
 gateway=192.168.1.1
-interfance=eth0
+interface=eth0
 
 echo "${hostname}" | sudo tee /etc/hostname
 echo "${ip} ${hostname}.local ${hostname}" | sudo tee -a /etc/hosts
 ```
 
-按自己的网络环境改 `hostname`、`ip`、`gateway`、`interfance`（网卡名）即可。
+按自己的网络环境改 `hostname`、`ip`、`gateway`、`interface`（网卡名）即可。
 
 ## 2. 添加 Proxmox APT 源
 
@@ -78,7 +78,7 @@ echo "
 auto lo
 iface lo inet loopback
 
-iface ${interfance} inet manual
+iface ${interface} inet manual
 
 auto vmbr0
 iface vmbr0 inet static
@@ -86,7 +86,7 @@ iface vmbr0 inet static
     gateway ${gateway}
     dns-nameservers ${gateway}
     dns-search local
-    bridge-ports ${interfance}
+    bridge-ports ${interface}
     bridge-stp off
     bridge-fd 0
     bridge-vlan-aware yes
